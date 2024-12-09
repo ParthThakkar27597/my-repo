@@ -8,8 +8,8 @@ const path = require("path");
 const DEFAULT_COUNTRY_CODE = "91"; // Change this as per your country
 
 // Delay bounds in milliseconds
-const MIN_DELAY = 60 * 1000; // 1 minute
-const MAX_DELAY = 3 * 60 * 1000; // 3 minutes
+const MIN_DELAY = 40 * 1000; // 1 minute
+const MAX_DELAY = 50 * 1000; // 3 minutes
 
 // Path to store session data
 const SESSION_FILE_PATH = "./session.json";
