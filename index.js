@@ -1,4 +1,4 @@
-const { Client, MessageMedia } = require("whatsapp-web.js");
+const { Client, MessageMedia, LocalAuth } = require("whatsapp-web.js");
 const qrcode = require("qrcode-terminal");
 const fs = require("fs");
 const xlsx = require("xlsx");
@@ -11,45 +11,70 @@ const DEFAULT_COUNTRY_CODE = "91"; // Change this as per your country
 const MIN_DELAY = 60 * 1000; // 1 minute
 const MAX_DELAY = 3 * 60 * 1000; // 3 minutes
 
-// Initialize WhatsApp client
-const client = new Client();
+// Path to store session data
+const SESSION_FILE_PATH = "./session.json";
 
-let isLoggedIn = false; // Track if logged in
+// Initialize WhatsApp client with session handling
+let sessionData;
+if (fs.existsSync(SESSION_FILE_PATH)) {
+  sessionData = JSON.parse(fs.readFileSync(SESSION_FILE_PATH, "utf-8"));
+}
 
+const client = new Client({
+  // authStrategy: new LocalAuth({ clientId: "client-one" }),
+});
+
+let isLoggedIn = false;
+
+// QR code event
 client.on("qr", (qr) => {
   console.log("Scan this QR code with your WhatsApp:");
   qrcode.generate(qr, { small: true });
 });
 
+// Ready event
 client.on("ready", () => {
   isLoggedIn = true;
   console.log("WhatsApp Web is ready!");
   sendMessages();
 });
 
-client.on("authenticated", () => {
+// Authenticated event
+client.on("authenticated", (session) => {
   console.log("Authenticated with WhatsApp Web!");
+  // fs.writeFileSync(SESSION_FILE_PATH, JSON.stringify(session));
 });
 
+// Authentication failure
 client.on("auth_failure", (msg) => {
   console.error("Authentication failed:", msg);
   isLoggedIn = false;
 });
 
+// Disconnected event
 client.on("disconnected", (reason) => {
   console.error("WhatsApp disconnected:", reason);
   isLoggedIn = false;
   client.initialize(); // Re-initialize to generate a new QR code
 });
 
+// Initialize client
 client.initialize();
 
 // Load the message template
 const messageTemplate = fs.readFileSync("./message.txt", "utf8");
 
-// Load the attachment (image) from the public folder
-const imagePath = path.resolve("./public/image.jpg"); // Change the filename if needed
-const media = MessageMedia.fromFilePath(imagePath);
+// Load the attachments (images) from the public folder
+const mediaPaths = {
+  img1: path.resolve("./public/img1.jpg"),
+  img2: path.resolve("./public/img2.jpg"),
+  img3: path.resolve("./public/img3.jpg"),
+};
+const media = {
+  img1: MessageMedia.fromFilePath(mediaPaths.img1),
+  img2: MessageMedia.fromFilePath(mediaPaths.img2),
+  img3: MessageMedia.fromFilePath(mediaPaths.img3),
+};
 
 // Function to send messages
 async function sendMessages() {
@@ -69,6 +94,7 @@ async function sendMessages() {
   for (const row of data) {
     const name = row["Name"];
     let number = row["Phone"];
+    number = sanitizeNumber(DEFAULT_COUNTRY_CODE, number);
 
     if (!number || isNaN(number)) {
       results.push({ Name: name, Phone: number, Status: "number incorrect" });
@@ -77,7 +103,6 @@ async function sendMessages() {
     }
 
     // Add country code if missing
-    number = sanitizeNumber(DEFAULT_COUNTRY_CODE, number);
     const formattedNumber = `${number}@c.us`;
 
     try {
@@ -94,11 +119,17 @@ async function sendMessages() {
         continue;
       }
 
-      // Customize the message
-      const personalizedMessage = messageTemplate.replace("{{NAME}}", name);
+      // Send images (img1 and img2)
+      await client.sendMessage(formattedNumber, media.img1);
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Small delay
+      await client.sendMessage(formattedNumber, media.img2);
+      console.log(`Images sent to ${name}: ${number}`);
 
-      // Send the message with attachment
-      await client.sendMessage(formattedNumber, personalizedMessage, { media });
+      // Send img3 with text
+      const personalizedMessage = messageTemplate.replace("{{NAME}}", name);
+      await client.sendMessage(formattedNumber, personalizedMessage, {
+        media: media.img3,
+      });
       console.log(`Message sent to ${name}: ${number}`);
       successCount++;
 

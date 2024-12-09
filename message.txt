@@ -1,7 +1,3 @@
-Hello {{NAME}},
+Respected Advocate Shri {{NAME}},
 
-Test 2
-Please find the sameple test message.
-Please vote for me thank you.
-
-DB
+I, Thakkar Viraj Prakash (Viraj Thakkar), am contesting for Contestant No. 2️⃣ for the position of Joint Secretary in the upcoming elections of the BBA. I kindly request your support and vote.
