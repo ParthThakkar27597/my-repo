@@ -1,0 +1,7 @@
+Hello {{NAME}},
+
+Test 2
+Please find the sameple test message.
+Please vote for me thank you.
+
+DB
