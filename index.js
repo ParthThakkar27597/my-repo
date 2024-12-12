@@ -11,8 +11,8 @@ const DEFAULT_COUNTRY_CODE = "91"; // Change this as per your country
 const MIN_DELAY = 25 * 1000; // 1 minute
 const MAX_DELAY = 50 * 1000; // 3 minutes
 
-const START_ROW = 501
-const END_ROW = 600
+const START_ROW = 1301
+const END_ROW = 1500
 
 // Path to store session data
 const SESSION_FILE_PATH = "./session.json";
