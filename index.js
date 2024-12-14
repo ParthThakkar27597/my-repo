@@ -8,8 +8,8 @@ const path = require("path");
 const DEFAULT_COUNTRY_CODE = "91"; // Change this as per your country
 
 // Delay bounds in milliseconds
-const MIN_DELAY = 0 //25 * 1000; // 1 minute
-const MAX_DELAY = 0 //50 * 1000; // 3 minutes
+const MIN_DELAY = 5            //25 * 1000; // 1 minute
+const MAX_DELAY = 10           //50 * 1000; // 3 minutes
 
 const START_ROW = 2612
 const END_ROW = 4300
